@@ -18,7 +18,6 @@ let width,
 
 
 //SCREEN & MOUSE VARIABLES
-
 var HEIGHT, WIDTH,
     mousePos = { x: 0, y: 0 };
  
@@ -26,7 +25,6 @@ function init(event){
     document.addEventListener('mousemove', handleMouseMove, false);
     addLights();
     grassPlane();
-      // testWork();
     pyrimids();
     drawingImagePng();
     modellingJsonLoader();
@@ -35,35 +33,34 @@ function init(event){
     drawSky();
 }
 
-
 // HANDLE MOUSE EVENTS
 var mousePos = { x: 0, y: 0 };
 
 function handleMouseMove(event) {
-  var tx = -1 + (event.clientX / WIDTH)*2;
-  var ty = 1 - (event.clientY / HEIGHT)*2;
-  mousePos = {x:tx, y:ty};
+    var tx = -1 + (event.clientX / WIDTH)*2;
+    var ty = 1 - (event.clientY / HEIGHT)*2;
+    mousePos = {x:tx, y:ty};
 }
 
 window.addEventListener('load', init, false);
 
 function createScene() {
-  WIDTH = window.innerWidth,
-  HEIGHT = window.innerHeight;
-  
-  scene = new THREE.Scene();
-  scene.fog = new THREE.Fog(0xf7d9aa, 100,950);
+    WIDTH = window.innerWidth,
+    HEIGHT = window.innerHeight;
 
-  camera = new THREE.PerspectiveCamera(70, WIDTH / HEIGHT, 0.1, 1000);
-  camera.lookAt(scene.position);
-  camera.position.x = 0;
-  camera.position.z = 10;
-  camera.position.y = 1.5;
+    scene = new THREE.Scene();
+    scene.fog = new THREE.Fog(0xf7d9aa, 100,950);
 
-  renderer = new THREE.WebGLRenderer({ alpha: true });
-  renderer.setPixelRatio(window.devicePixelRatio);
-  renderer.setSize(WIDTH, HEIGHT);
-  renderer.shadowMap.enabled = true;
+    camera = new THREE.PerspectiveCamera(70, WIDTH / HEIGHT, 0.1, 1000);
+    camera.lookAt(scene.position);
+    camera.position.x = 0;
+    camera.position.z = 10;
+    camera.position.y = 1.5;
+
+    renderer = new THREE.WebGLRenderer({ alpha: true });
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setSize(WIDTH, HEIGHT);
+    renderer.shadowMap.enabled = true;
   
     // move orbit around (comment out at the moment)
     controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -148,20 +145,39 @@ function drawingImagePng() {
 
     sprite.scale.set(6, 5, 5);
     sprite.position.set(0, 3.5, 0.3);
-    scene.add(sprite);
+    scene.add(sprite); 
+}
+
+function spriteMove(speed) {
+    this.vAngle += speed;
+    this.group.position.y = Math.sin(this.vAngle) + 1.38;
+        // const legRotation = Math.sin(this.vAngle) * Math.PI / 20 + 0.4;
+        // this.leftPart.rotation.z = leftPartRotation;
 }
 
 // LOAD brain.json AND POSITION
 function modellingJsonLoader() {
-    var loader = new THREE.ObjectLoader();
-    loader.load("brain.json",function ( obj ) {
+    var brainLoader = new THREE.ObjectLoader();
+
+    brainLoader.load("brain.json",function (brain) {
         brain.scale.set( .1, .1, .1 );
-        brain.position.set(-5, 5, 1);
+        brain.position.set(-0.7, 3, 1);
         brain.rotation.x = rad(-20);
         scene.add(brain);
     });
+
+    var shovelLoader= new THREE.JSONLoader();
+
+    shovelLoader.load('cat.json', function(shovel) {
+        mesh = new THREE.Mesh(shovel);
+        shovel.scale.set( .1, .1, .1 );
+        shovel.position.set(-0.9, 3, 1);
+        shovel.rotation.x = rad(-20);
+        scene.add(mesh);
+    });
 }
 
+// DRAWING CLASSES
 function drawCastle() {
     castle = new Castle();
     scene.add(castle.group)
@@ -177,6 +193,7 @@ function drawSky() {
     sky.showNightSky(night);
     scene.add(sky.group);
 }
+
 
 function onMouseDown(event) {
     mouseDown = true;
@@ -215,8 +232,8 @@ class Castle {
         this.drawCastleParts();
         
         this.group.traverse((part) => {
-          part.castShadow = true;
-          part.receiveShadow = true;
+            part.castShadow = true;
+            part.receiveShadow = true;
         });
     }
 
@@ -301,7 +318,6 @@ class Rocks {
         this.leftPart.position.set(-3, 1.4, 2);
         this.leftPart.scale.set(1, 1, 1);
         this.leftPart.rotation.x = -90;
-        console.log(this.leftPart.rotation.x = -90);
         this.group.add(this.leftPart);
 
         this.rightPart = this.leftPart.clone();
@@ -326,9 +342,10 @@ class Rocks {
     }
 }
 
-// function rad(degrees) {
-//   return degrees * (Math.PI / 180);
-// }
+// RADIUS
+function rad(degrees) {
+  return degrees * (Math.PI / 180);
+}
 
 class Sky {
     constructor() {
@@ -347,6 +364,7 @@ class Sky {
         this.group.add(this.daySky);
         this.group.add(this.nightSky);
     }
+
     drawSky(phase) {
         for (let i = 0; i < 30; i ++) {
             const geometry = new THREE.IcosahedronGeometry(0.4, 0);
@@ -368,6 +386,7 @@ class Sky {
             }
         }
     }
+
     drawNightLights() {
         const geometry = new THREE.SphereGeometry(0.1, 5, 5);
         const material = new THREE.MeshStandardMaterial({
@@ -391,6 +410,7 @@ class Sky {
             this.nightSky.add(light);
         }
     }
+
     showNightSky(condition) {
         if (condition) {
           this.daySky.position.set(100, 100, 100);
@@ -400,6 +420,7 @@ class Sky {
           this.nightSky.position.set(100, 100, 100);
         }
     }
+
     moveSky() {
         this.group.rotation.x += 0.001;
         this.group.rotation.y -= 0.004;
