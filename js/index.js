@@ -16,7 +16,6 @@ let sheep,
 let width,
     height;
 
-
 //SCREEN & MOUSE VARIABLES
 var HEIGHT, WIDTH,
     mousePos = { x: 0, y: 0 };
@@ -35,6 +34,9 @@ function init(event){
 
 // HANDLE MOUSE EVENTS
 var mousePos = { x: 0, y: 0 };
+var mouseX = 0, mouseY = 0;
+var windowHalfX = window.innerWidth / 2;
+var windowHalfY = window.innerHeight / 2;
 
 function handleMouseMove(event) {
     var tx = -1 + (event.clientX / WIDTH)*2;
@@ -71,7 +73,16 @@ function createScene() {
   
     document.addEventListener('mousedown', onMouseDown);
     document.addEventListener('mouseup', onMouseUp);
+    document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+
     window.addEventListener('resize', handleWindowResize);
+}
+
+// MOUSE MOVE
+function onDocumentMouseMove( event ) {
+    mouseX = ( event.clientX - windowHalfX ) / 2;
+    mouseY = ( event.clientY - windowHalfY ) / 2;
+    console.log(mouseX);
 }
 
 // HANDLE SCREEN EVENTS
@@ -157,23 +168,24 @@ function spriteMove(speed) {
 
 // LOAD brain.json AND POSITION
 function modellingJsonLoader() {
-    var brainLoader = new THREE.ObjectLoader();
+    var loader = new THREE.ObjectLoader();
 
-    brainLoader.load("brain.json",function (brain) {
+    loader.load("rabbit.json",function (rabbit) {
+        rabbit.scale.set(10, 10, 6);
+        // rabbit.position.set(-.9, 5, 2);
+        // rabbit.rotation.x = rad(180);
+        scene.add(rabbit);
+    });
+
+    loader.load("brain.json",function (brain) {
         brain.scale.set( .1, .1, .1 );
         brain.position.set(-0.7, 3, 1);
         brain.rotation.x = rad(-20);
         scene.add(brain);
     });
 
-    var shovelLoader= new THREE.JSONLoader();
-
-    shovelLoader.load('cat.json', function(shovel) {
-        mesh = new THREE.Mesh(shovel);
-        shovel.scale.set( .1, .1, .1 );
-        shovel.position.set(-0.9, 3, 1);
-        shovel.rotation.x = rad(-20);
-        scene.add(mesh);
+    loader.load("shovel.json",function (obj) {
+         scene.add( obj );
     });
 }
 
